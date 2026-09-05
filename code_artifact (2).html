@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حي أم غير حي؟ 🌱</title>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --secondary: #FF9800;
+            --danger: #F44336;
+            --bg-color: #E8F5E9;
+            --card-bg: #FFFFFF;
+            --text-color: #2E7D32;
+            --font-family: 'Comic Sans MS', 'Changa', 'Cairo', Tahoma, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#A5D6A7 2px, transparent 2px);
+            background-size: 24px 24px;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            direction: rtl;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--card-bg);
+            border-radius: 28px;
+            box-shadow: 0 12px 32px rgba(46, 125, 50, 0.15);
+            border: 5px solid #A5D6A7;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        /* Control Buttons Top Header */
+        .top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sound-btn {
+            background: #FFF3E0;
+            border: 2px solid var(--secondary);
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            color: #E65100;
+            transition: all 0.2s ease;
+        }
+
+        .sound-btn:hover {
+            transform: scale(1.05);
+            background: #FFE0B2;
+        }
+
+        /* Screen Styles */
+        .screen {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Start Screen */
+        .start-title {
+            font-size: 2.3rem;
+            color: var(--text-color);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px #C8E6C9;
+        }
+
+        .start-subtitle {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 25px;
+        }
+
+        .decorations {
+            font-size: 3rem;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-main {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 16px 45px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #E65100, 0 10px 20px rgba(0,0,0,0.15);
+            transition: all 0.15s ease;
+            font-family: inherit;
+            margin-top: 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-main:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #E65100, 0 5px 10px rgba(0,0,0,0.15);
+        }
+
+        /* Game Screen */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            background: #F1F8E9;
+            padding: 10px 18px;
+            border-radius: 18px;
+        }
+
+        .score-badge {
+            background: #FFF9C4;
+            color: #F57F17;
+            padding: 4px 14px;
+            border-radius: 20px;
+            border: 2px solid #FBC02D;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 14px;
+            background-color: #E0E0E0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #81C784, #4CAF50);
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .question-card {
+            background: #FAFAFA;
+            border: 3px dashed #BDBDBD;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .item-display {
+            font-size: 6rem;
+            margin: 10px 0;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 8px 8px rgba(0,0,0,0.1));
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .item-name {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #2C3E50;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            color: #424242;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .options-container {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-option {
+            flex: 1;
+            min-width: 180px;
+            padding: 16px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+        }
+
+        .btn-living {
+            background-color: #81C784;
+            color: #1B5E20;
+            border: 2px solid #4CAF50;
+        }
+
+        .btn-living:hover {
+            background-color: #66BB6A;
+        }
+
+        .btn-non-living {
+            background-color: #FF8A80;
+            color: #B71C1C;
+            border: 2px solid #FF5252;
+        }
+
+        .btn-non-living:hover {
+            background-color: #FF5252;
+            color: white;
+        }
+
+        .btn-option:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+
+        /* Feedback Modal/Box */
+        .feedback-container {
+            display: none;
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 15px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            border: 3px solid #FFD54F;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .feedback-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .feedback-title.correct {
+            color: #2E7D32;
+        }
+
+        .feedback-title.wrong {
+            color: #E65100;
+        }
+
+        .feedback-info {
+            font-size: 1.14rem;
+            color: #424242;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            background: #FFFDE7;
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .btn-next {
+            background: #29B6F6;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 10px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #0288D1;
+            font-family: inherit;
+        }
+
+        .btn-next:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+
+        /* Result Screen */
+        .result-box {
+            background: #F1F8E9;
+            padding: 25px;
+            border-radius: 24px;
+            border: 3px solid #81C784;
+            margin: 20px 0;
+        }
+
+        .result-score {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #2E7D32;
+            margin: 15px 0;
+        }
+
+        .result-msg {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        /* Canvas for Confetti */
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .start-title { font-size: 1.8rem; }
+            .item-display { font-size: 4.5rem; height: 90px; }
+            .options-container { flex-direction: column; }
+            .btn-option { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <canvas id="confetti-canvas"></canvas>
+
+        <!-- Top Sound Toggle -->
+        <div class="top-controls">
+            <button class="sound-btn" id="soundToggleBtn" onclick="toggleSound()">
+                🔊 الصوت: مفعل
+            </button>
+        </div>
+
+        <!-- 1. Start Screen -->
+        <div id="startScreen" class="screen active">
+            <h1 class="start-title">🌱 حي أم غير حي؟ 🔍</h1>
+            <p class="start-subtitle">اختبر مهارتك وتعرّف إلى المخلوقات الحية!</p>
+            
+            <div class="decorations">
+                <span>🌳</span>
+                <span>🐱</span>
+                <span>🐦</span>
+                <span>🌷</span>
+                <span>🪨</span>
+                <span>🚗</span>
+            </div>
+
+            <button class="btn-main" onclick="startGame()">
+                🚀 ابدأ اللعبة
+            </button>
+        </div>
+
+        <!-- 2. Game Screen -->
+        <div id="gameScreen" class="screen">
+            <div class="status-bar">
+                <span id="questionCounter">السؤال: 1 / 10</span>
+                <span class="score-badge" id="scoreDisplay">⭐ النقاط: 0</span>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="question-card">
+                <div class="item-display" id="itemEmoji">🐱</div>
+                <div class="item-name" id="itemName">قطة</div>
+                <div class="question-text">هل هذا مخلوق حي؟ 🤔</div>
+
+                <div class="options-container" id="optionsGroup">
+                    <button class="btn-option btn-living" onclick="checkAnswer(true)">
+                        🟢 مخلوق حي
+                    </button>
+                    <button class="btn-option btn-non-living" onclick="checkAnswer(false)">
+                        🔴 شيء غير حي
+                    </button>
+                </div>
+            </div>
+
+            <!-- Interactive Feedback Area -->
+            <div class="feedback-container" id="feedbackArea">
+                <div class="feedback-title" id="feedbackTitle">أحسنت! ⭐ إجابة صحيحة</div>
+                <div class="feedback-info" id="feedbackText">العلة التعليمية تظهر هنا...</div>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">
+                    ➡️ السؤال التالي
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. Result Screen -->
+        <div id="resultScreen" class="screen">
+            <h1 class="start-title">🎉 انتهت اللعبة! 🎉</h1>
+            
+            <div class="result-box">
+                <div class="result-score" id="finalScore">⭐ نتيجتك: 100 / 100</div>
+                <div class="result-msg" id="resultMessage">ممتاز! أنت خبير في المخلوقات الحية!</div>
+            </div>
+
+            <button class="btn-main" onclick="restartGame()">
+                🔄 العب مرة أخرى
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Database of Questions suitable for Grade 3
+        const gameItems = [
+            // Living Things (مخلوقات حية)
+            {
+                name: 'قطة',
+                emoji: '🐱',
+                isLiving: true,
+                info: 'القطة مخلوق حي؛ لأنها تنمو وتتحرك وتحتاج إلى الغذاء والماء والغازات.'
+            },
+            {
+                name: 'طائر',
+                emoji: '🐦',
+                isLiving: true,
+                info: 'الطائر مخلوق حي؛ لأنه يتنفس الهواء وينمو ويتكاثر عن طريق وضع البيض.'
+            },
+            {
+                name: 'سمكة',
+                emoji: '🐟',
+                isLiving: true,
+                info: 'السمكة مخلوق حي؛ لأنها تعيش في الماء وتتغذى وتتنفس وتتكاثر.'
+            },
+            {
+                name: 'شجرة',
+                emoji: '🌳',
+                isLiving: true,
+                info: 'الشجرة مخلوق حي؛ لأنها تصنع غذائها بنفسها وتنمو وتستجيب للبيئة.'
+            },
+            {
+                name: 'زهرة',
+                emoji: '🌷',
+                isLiving: true,
+                info: 'النبات مخلوق حي؛ لأنه ينمو ويحتاج إلى الماء والغازات والمكان المناسب.'
+            },
+            {
+                name: 'أرنب',
+                emoji: '🐰',
+                isLiving: true,
+                info: 'الأرنب مخلوق حي؛ لأنه ينمو ويتغذى على النباتات ويكبر ويتكاثر.'
+            },
+            {
+                name: 'كلب',
+                emoji: '🐕',
+                isLiving: true,
+                info: 'الكلب مخلوق حي؛ لأنه يستجيب للمؤثرات وينمو ويحتاج إلى الغذاء والماء.'
+            },
+            {
+                name: 'فراشة',
+                emoji: '🦋',
+                isLiving: true,
+                info: 'الفراشة مخلوق حي؛ لأنها تتغذى على رحيق الأزهار وتنمو وتتكاثر.'
+            },
+
+            // Non-Living Things (أشياء غير حية)
+            {
+                name: 'سيارة',
+                emoji: '🚗',
+                isLiving: false,
+                info: 'السيارة شيء غير حي؛ لأنها لا تنمو ولا تتكاثر ولا تتنفس مثل المخلوقات الحية.'
+            },
+            {
+                name: 'كرسي',
+                emoji: '🪑',
+                isLiving: false,
+                info: 'الكرسي شيء غير حي؛ لأنه لا يحتاج إلى الغذاء والماء ولا ينمو أبداً.'
+            },
+            {
+                name: 'كرة',
+                emoji: '⚽',
+                isLiving: false,
+                info: 'الكرة شيء غير حي؛ لأنها لا تتحرك بنفسها ولا تنمو ولا تتنفس.'
+            },
+            {
+                name: 'صخرة',
+                emoji: '🪨',
+                isLiving: false,
+                info: 'الصخرة شيء غير حي؛ لأنها لا تنمو ولا تتكاثر ولا تحتاج إلى الغذاء والماء.'
+            },
+            {
+                name: 'كتاب',
+                emoji: '📕',
+                isLiving: false,
+                info: 'الكتاب شيء غير حي؛ لأنه مصنوع من مواد لا تتنفس ولا تنمو.'
+            },
+            {
+                name: 'قلم',
+                emoji: '✏️',
+                isLiving: false,
+                info: 'القلم شيء غير حي؛ لأنه لا يستجيب للبيئة ولا يحتاج إلى طعام أو ماء.'
+            },
+            {
+                name: 'منزل',
+                emoji: '🏠',
+                isLiving: false,
+                info: 'المنزل شيء غير حي؛ لأنه جماد لا ينمو ولا يتكاثر مع مرور الوقت.'
+            },
+            {
+                name: 'دراجة',
+                emoji: '🚲',
+                isLiving: false,
+                info: 'الدراجة شيء غير حي؛ لأنها آلة تحتاج لمن يحركها ولا تتنفس أو تنمو.'
+            }
+        ];
+
+        // Game State Variables
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let soundEnabled = true;
+        const totalQuestions = 10;
+
+        // Web Audio API Context for generating sound effects synthesized locally
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+
+                if (type === 'correct') {
+                    // Upbeat Arpeggio sound
+                    const now = ctx.currentTime;
+                    const osc1 = ctx.createOscillator();
+                    const osc2 = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc1.type = 'sine';
+                    osc2.type = 'triangle';
+
+                    osc1.frequency.setValueAtTime(523.25, now); // C5
+                    osc1.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc1.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    osc1.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+
+                    osc1.connect(gain);
+                    osc2.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc1.start(now);
+                    osc1.stop(now + 0.5);
+                } else if (type === 'wrong') {
+                    // Gentle Low sound for error (Not scary)
+                    const now = ctx.currentTime;
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.setValueAtTime(196, now + 0.15); // G3
+
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'win') {
+                    // Fanfare end melody
+                    const now = ctx.currentTime;
+                    const notes = [400, 500, 600, 800];
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(0.25, now + idx * 0.12);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.12 + 0.3);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + idx * 0.12);
+                        osc.stop(now + idx * 0.12 + 0.3);
+                    });
+                }
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundToggleBtn');
+            btn.innerText = soundEnabled ? '🔊 الصوت: مفعل' : '🔇 الصوت: مكتوم';
+        }
+
+        // Shuffle utility
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Navigation between screens
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // Start Game Init
+        function startGame() {
+            currentQuestions = shuffleArray(gameItems).slice(0, totalQuestions);
+            currentIndex = 0;
+            score = 0;
+            updateScoreUI();
+            showScreen('gameScreen');
+            loadQuestion();
+        }
+
+        function updateScoreUI() {
+            document.getElementById('scoreDisplay').innerText = `⭐ النقاط: ${score}`;
+        }
+
+        function loadQuestion() {
+            // Reset feedback display
+            document.getElementById('feedbackArea').style.display = 'none';
+            document.getElementById('optionsGroup').style.pointerEvents = 'auto';
+            document.getElementById('optionsGroup').style.opacity = '1';
+
+            const q = currentQuestions[currentIndex];
+            document.getElementById('questionCounter').innerText = `السؤال: ${currentIndex + 1} / ${totalQuestions}`;
+            document.getElementById('itemEmoji').innerText = q.emoji;
+            document.getElementById('itemName').innerText = q.name;
+
+            // Update Progress Bar
+            const progressPercent = (currentIndex / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+        }
+
+        function checkAnswer(userChoice) {
+            const q = currentQuestions[currentIndex];
+            const feedbackArea = document.getElementById('feedbackArea');
+            const feedbackTitle = document.getElementById('feedbackTitle');
+            const feedbackText = document.getElementById('feedbackText');
+            const nextBtn = document.getElementById('nextBtn');
+
+            if (userChoice === q.isLiving) {
+                // Correct Answer
+                playSound('correct');
+                score += 10;
+                updateScoreUI();
+                triggerConfetti(false);
+
+                feedbackTitle.className = 'feedback-title correct';
+                feedbackTitle.innerText = 'أحسنت! ⭐ إجابة صحيحة';
+                feedbackText.innerText = q.info;
+                nextBtn.style.display = 'inline-block';
+
+                // Disable choices after correct answer
+                document.getElementById('optionsGroup').style.pointerEvents = 'none';
+                document.getElementById('optionsGroup').style.opacity = '0.6';
+                feedbackArea.style.display = 'block';
+
+            } else {
+                // Wrong Answer (Give hint and let student retry)
+                playSound('wrong');
+                feedbackTitle.className = 'feedback-title wrong';
+                feedbackTitle.innerText = 'حاول مرة أخرى 💪';
+                feedbackText.innerText = 'فكر: هل هذا الشيء ينمو ويحتاج إلى الغذاء والماء والغازات؟ 🤔';
+                nextBtn.style.display = 'none'; // Student must retry option
+                feedbackArea.style.display = 'block';
+            }
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < totalQuestions) {
+                loadQuestion();
+            } else {
+                finishGame();
+            }
+        }
+
+        function finishGame() {
+            // Update progress bar to full
+            document.getElementById('progressBar').style.width = '100%';
+
+            playSound('win');
+            triggerConfetti(true);
+
+            document.getElementById('finalScore').innerText = `⭐ نتيجتك: ${score} / ${totalQuestions * 10}`;
+
+            const resultMessage = document.getElementById('resultMessage');
+            if (score >= 90) {
+                resultMessage.innerText = '🏆 ممتاز! أنت خبير متألق في المخلوقات الحية!';
+            } else if (score >= 70) {
+                resultMessage.innerText = '🌟 رائع! لديك معرفة جيدة بالمخلوقات الحية.';
+            } else {
+                resultMessage.innerText = '💪 جيد! حاول مرة أخرى لتحصل على نتيجة أعلى.';
+            }
+
+            showScreen('resultScreen');
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        // Lightweight Confetti Animation Effect
+        function triggerConfetti(isBig) {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            const pieces = [];
+            const count = isBig ? 80 : 35;
+            const colors = ['#4CAF50', '#FF9800', '#29B6F6', '#E91E63', '#FFD54F'];
+
+            for (let i = 0; i < count; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 6,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 3 + 2,
+                    speedX: (Math.random() - 0.5) * 2,
+                    rotation: Math.random() * 360
+                });
+            }
+
+            let animationFrame;
+            let timer = 0;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                pieces.forEach((p) => {
+                    ctx.save();
+                    ctx.fillStyle = p.color;
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    p.rotation += 4;
+                });
+
+                timer++;
+                if (timer < 100) {
+                    animationFrame = requestAnimationFrame(draw);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    cancelAnimationFrame(animationFrame);
+                }
+            }
+
+            draw();
+        }
+    </script>
+</body>
+</html>
